@@ -1,10 +1,9 @@
-//> Evaluating Expressions runtime-error-class
 package com.craftinginterpreters.lox;
 
-class RuntimeError extends RuntimeException {
+public class RuntimeError extends RuntimeException {
   final Token token;
 
-  RuntimeError(Token token, String message) {
+  public RuntimeError(Token token, String message) {
     super(message);
     this.token = token;
   }
