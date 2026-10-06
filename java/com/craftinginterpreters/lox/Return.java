@@ -1,10 +1,10 @@
 package com.craftinginterpreters.lox;
 
 public class Return extends RuntimeException {
-  final Object value;
+    final Object value;
 
-  public Return(Object value) {
-    super(null, null, false, false);
-    this.value = value;
-  }
+    public Return(Object value) {
+        super(null, null, false, false);
+        this.value = value;
+    }
 }
