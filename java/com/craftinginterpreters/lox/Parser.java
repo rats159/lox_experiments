@@ -146,6 +146,10 @@ public class Parser {
 
     private Stmt varDeclaration() {
         Token name = consume(IDENTIFIER, "Expect variable name.");
+        Type type = null;
+        if (match(COLON)) {
+            type = parseType();
+        }
 
         Expr initializer = null;
         if (match(EQUAL)) {
@@ -153,7 +157,7 @@ public class Parser {
         }
 
         consume(SEMICOLON, "Expect ';' after variable declaration.");
-        return new Stmt.Var(name, initializer);
+        return new Stmt.Var(name, type, initializer);
     }
 
     private Stmt whileStatement() {
@@ -370,6 +374,12 @@ public class Parser {
         }
 
         throw error(peek(), "Expect expression.");
+    }
+
+    private Type parseType() {
+        Token name = consume(IDENTIFIER, "Expect type name.");
+
+        return new Type.Named(name);
     }
 
     private boolean match(TokenType... types) {

@@ -14,26 +14,35 @@ public class Lox {
     static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 1) {
-            System.out.println("Usage: jlox [script]");
-            System.exit(64); // [64]
-        } else if (args.length == 1) {
-            runFile(args[0]);
+        boolean shouldPrint = false;
+        String script = null;
+
+        for (String arg : args) {
+            if (arg.equals("-print")) {
+                shouldPrint = true;
+            } else {
+                script = arg;
+            }
+        }
+            System.out.println(shouldPrint);
+
+        if (script == null) {
+            runPrompt(shouldPrint);
         } else {
-            runPrompt();
+            runFile(script, shouldPrint);
         }
     }
 
-    private static void runFile(String path) throws IOException {
+    private static void runFile(String path, boolean shouldPrint) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
+        run(new String(bytes, Charset.defaultCharset()), shouldPrint);
 
         // Indicate an error in the exit code.
         if (hadError) System.exit(65);
         if (hadRuntimeError) System.exit(70);
     }
 
-    private static void runPrompt() throws IOException {
+    private static void runPrompt(boolean shouldPrint) throws IOException {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
@@ -41,12 +50,12 @@ public class Lox {
             System.out.print("> ");
             String line = reader.readLine();
             if (line == null) break;
-            run(line);
+            run(line, shouldPrint);
             hadError = false;
         }
     }
 
-    private static void run(String source) {
+    private static void run(String source, boolean shouldPrint) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens);
@@ -54,6 +63,13 @@ public class Lox {
 
         // Stop if there was a syntax error.
         if (hadError) return;
+
+        if (shouldPrint) {
+            AstPrinter printer = new AstPrinter();
+            for (Stmt stmt : statements) {
+                System.out.println(printer.print(stmt));
+            }
+        }
 
         Resolver resolver = new Resolver(interpreter);
         resolver.resolve(statements);

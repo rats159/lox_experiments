@@ -133,9 +133,11 @@ public abstract class Stmt {
     public static class Var extends Stmt {
         final Token name;
         final Expr initializer;
+        final Type type;
 
-        Var(Token name, Expr initializer) {
+        Var(Token name, Type type, Expr initializer) {
             this.name = name;
+            this.type = type;
             this.initializer = initializer;
         }
 

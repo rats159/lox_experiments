@@ -1,0 +1,4 @@
+var x;
+var x = 5;
+var x : number;
+var z : number = 5;

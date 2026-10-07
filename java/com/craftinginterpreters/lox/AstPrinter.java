@@ -2,7 +2,7 @@ package com.craftinginterpreters.lox;
 
 import java.util.List;
 
-public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
+public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String>, Type.Visitor<String> {
     String print(Expr expr) {
         return expr.accept(this);
     }
@@ -90,10 +90,19 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
     @Override
     public String visitVarStmt(Stmt.Var stmt) {
         if (stmt.initializer == null) {
-            return parenthesize2("var", stmt.name);
+            if (stmt.type == null) {
+                return parenthesize2("var", stmt.name);
+            } else {
+                return parenthesize2("var", stmt.name, ":", stmt.type);
+            }
+        } else {
+            if (stmt.type == null) {
+                return parenthesize2("var", stmt.name, "=", stmt.initializer);
+            } else {
+                return parenthesize2("var", stmt.name, ":", stmt.type, "=", stmt.initializer);
+            }
         }
 
-        return parenthesize2("var", stmt.name, "=", stmt.initializer);
     }
 
     @Override
@@ -164,6 +173,11 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
         return expr.name.lexeme;
     }
 
+    @Override
+    public String visitNamedType(Type.Named type) {
+        return type.name.lexeme;
+    }
+
     private String parenthesize(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
 
@@ -196,6 +210,7 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
             switch (part) {
                 case Expr expr -> builder.append(expr.accept(this));
                 case Stmt stmt -> builder.append(stmt.accept(this));
+                case Type type -> builder.append(type.accept(this));
                 case Token token -> builder.append(token.lexeme);
                 case List<?> list -> transform(builder, list.toArray());
                 case null, default -> builder.append(part);
